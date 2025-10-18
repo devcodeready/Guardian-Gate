@@ -1,53 +1,41 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
 import { Platform } from 'react-native';
 
-const tintColorLight = '#00598d';
-const tintColorDark = '#d2c074';
+// Tu paleta de colores con nombres semánticos
+const primaryColor = '#00598d';   // Azul corporativo
+const accentColor = '#d2c074';    // Dorado/amarillo para detalles
+const secondaryColor = '#E27434'; // Naranja para llamadas a la acción o alertas
 
 export const Colors = {
   light: {
     text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
+    background: '#f8f9fa', // Un blanco ligeramente apagado para un look más suave
+    tint: primaryColor,
     icon: '#687076',
     tabIconDefault: '#687076',
-    tabIconSelected: '#E27434',
+    tabIconSelected: secondaryColor,
   },
   dark: {
     text: '#ECEDEE',
     background: '#151718',
-    tint: tintColorDark,
+    tint: accentColor,
     icon: '#9BA1A6',
     tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    tabIconSelected: accentColor,
   },
+  // Colores adicionales para acceso global
+  primary: primaryColor,
+  accent: accentColor,
+  secondary: secondaryColor,
 };
 
+// Tus fuentes definidas
 export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'Lato',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'Open Sans',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
   default: {
     sans: 'Lato',
     serif: 'Open Sans',
-    rounded: 'normal',
-    mono: 'monospace',
   },
   web: {
     sans: "Lato, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
     serif: "'Open Sans', Georgia, 'Times New Roman', serif",
-    rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
-    mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   },
 });
