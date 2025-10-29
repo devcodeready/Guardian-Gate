@@ -1,70 +1,87 @@
 import { StyleSheet, View, TouchableOpacity, Dimensions, SafeAreaView, Alert } from 'react-native';
 import { Link } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
-import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Fonts } from '@/constants/theme';
 import * as Location from 'expo-location';
+import { useTimer } from '@/context/TimerContext'; // Hook para consumir el estado del temporizador
 
 // --- ARQUITECTURA DE DATOS PARA EL MENÚ ---
-// Se añade un nuevo item "Location" con un 'action' en lugar de 'href'
-// para manejar eventos que no son de navegación.
+// Se ha simplificado para solo contener el título y la acción (navegación o función).
+// El icono se reemplaza por el componente del temporizador.
 const menuItems = [
-  { id: 1, title: 'Attendance', icon: 'touch-app', href: '/(main)/attendance' },
-  { id: 2, title: 'Location', icon: 'my-location', action: 'getLocation' },
-  { id: 3, title: null, icon: null, href: null }, // Placeholder
-  { id: 4, title: null, icon: null, href: null }, // Placeholder
-  { id: 5, title: null, icon: null, href: null }, // Placeholder
-  { id: 6, title: null, icon: null, href: null }, // Placeholder
+  { id: 1, title: 'Check In', href: '/(main)/attendance' },
+  { id: 2, title: 'Check Out', action: 'getLocation' },
+  { id: 3, title: null, href: null }, // Placeholder
+  { id: 4, title: null, href: null }, // Placeholder
+  { id: 5, title: null, href: null }, // Placeholder
+  { id: 6, title: null, href: null }, // Placeholder
 ];
 
-// Cálculo dinámico para un diseño responsive de 2 columnas
+// --- CÁLCULOS DE DISEÑO RESPONSIVE ---
 const { width } = Dimensions.get('window');
 const paddingHorizontal = 24;
 const gap = 16;
 const numberOfColumns = 2;
 const itemSize = (width - (paddingHorizontal * 2) - gap) / numberOfColumns;
 
+// --- FUNCIÓN UTILITARIA ---
+// Formatea un número total de segundos al formato "MM:SS".
+// padStart(2, '0') asegura que siempre haya dos dígitos (e.g., "05" en lugar de "5").
+const formatTime = (seconds: number) => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+};
+
 export default function MainMenuScreen() {
+  // --- LÓGICA DE ESTADO ---
+  // Se consume el estado del temporizador desde el contexto global.
+  const { countdown, isTimerActive } = useTimer();
 
   // --- LÓGICA DE NEGOCIO ---
-  // Función asíncrona dedicada para manejar la obtención de la ubicación.
-  // Abstrae la lógica del componente y mejora la legibilidad.
   const handleLocationPress = async () => {
-    // 1. Petición de permisos: Se solicita permiso al usuario para acceder a la ubicación
-    //    mientras la app está en primer plano.
     const { status } = await Location.requestForegroundPermissionsAsync();
-
-    // 2. Validación de permisos: Si el permiso no es concedido, se notifica al usuario
-    //    y se detiene la ejecución.
     if (status !== 'granted') {
       Alert.alert('Permiso denegado', 'El permiso para acceder a la ubicación fue denegado.');
       return;
     }
-
-    // 3. Obtención de coordenadas: Si hay permiso, se obtiene la posición actual.
-    //    El objeto `{}` indica que se usa la configuración por defecto (precisión balanceada).
     const location = await Location.getCurrentPositionAsync({});
     const { latitude, longitude } = location.coords;
-
-    // 4. Feedback al usuario: Se muestran las coordenadas en un Alert.
-    //    Alert es una solución nativa simple y efectiva para mostrar información temporal.
     Alert.alert('Ubicación Actual', `Latitud: ${latitude.toFixed(4)}\nLongitud: ${longitude.toFixed(4)}`);
   };
 
-  // --- RENDERIZADO DEL COMPONENTE ---
-  // Se crea un objeto para mapear las acciones a sus funciones correspondientes.
-  // Este patrón (Strategy Pattern) permite escalar fácilmente a más acciones sin
-  // sobrecargar el JSX con lógica condicional.
   const actionHandlers: { [key: string]: () => void } = {
     getLocation: handleLocationPress,
   };
 
+  // --- SUB-COMPONENTE DE RENDERIZADO ---
+  // Un componente interno para mostrar el temporizador.
+  // Muestra "00:00" si el temporizador no está activo.
+  const TimerDisplay = () => (
+    <ThemedText style={styles.timerText}>
+      {isTimerActive ? formatTime(countdown) : "00:00"}
+    </ThemedText>
+  );
 
+  // --- RENDERIZADO PRINCIPAL ---
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.grid}>
         {menuItems.map((item) => {
-          // Si el item tiene una acción definida, se renderiza un botón con su handler.
+          // Si el item no tiene título, es un placeholder.
+          if (!item.title) {
+            return <View key={item.id} style={[styles.gridItem, styles.placeholderItem]} />;
+          }
+          
+          // Se define el contenido del botón para no repetirlo.
+          const buttonContent = (
+            <>
+              <TimerDisplay /> 
+              <ThemedText style={styles.gridItemText}>{item.title}</ThemedText>
+            </>
+          );
+
+          // Renderiza un botón con acción si 'item.action' existe.
           if (item.action) {
             return (
               <TouchableOpacity
@@ -73,40 +90,36 @@ export default function MainMenuScreen() {
                 onPress={actionHandlers[item.action]}
                 activeOpacity={0.7}
               >
-                <MaterialIcons name={item.icon as any} size={40} color={Colors.primary} />
-                <ThemedText style={styles.gridItemText}>{item.title}</ThemedText>
+                {buttonContent}
               </TouchableOpacity>
             );
           }
-
-          // Si el item tiene un 'href', es un botón de navegación.
+          
+          // Renderiza un botón de navegación si 'item.href' existe.
           if (item.href) {
             return (
               <Link key={item.id} href={item.href as any} asChild>
                 <TouchableOpacity style={styles.gridItem} activeOpacity={0.7}>
-                  <MaterialIcons name={item.icon as any} size={40} color={Colors.primary} />
-                  <ThemedText style={styles.gridItemText}>{item.title}</ThemedText>
+                  {buttonContent}
                 </TouchableOpacity>
               </Link>
             );
           }
-
-          // Si no, es un placeholder.
-          return (
-            <View key={item.id} style={[styles.gridItem, styles.placeholderItem]} />
-          );
+          
+          return null; // No renderizar nada si el item no tiene ni acción ni href.
         })}
       </View>
     </SafeAreaView>
   );
 }
 
+// --- HOJA DE ESTILOS ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.background,
+    backgroundColor: Colors.dark.background,
     paddingHorizontal: paddingHorizontal,
-    paddingTop: 16, // Espacio superior para la cuadrícula
+    paddingTop: 16,
   },
   grid: {
     flexDirection: 'row',
@@ -116,30 +129,29 @@ const styles = StyleSheet.create({
   gridItem: {
     width: itemSize,
     height: itemSize,
-    backgroundColor: '#fff',
+    backgroundColor: '#25282a',
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
     gap: 8,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+  },
+  timerText: {
+    fontFamily: Fonts.sans,
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: Colors.secondary, // Naranja para un alto impacto visual
   },
   gridItemText: {
     fontSize: 16,
     fontFamily: Fonts.sans,
     fontWeight: '600',
-    color: Colors.primary,
+    color: Colors.dark.text, // Texto blanco para contraste
   },
-  // Estilo específico para los placeholders
   placeholderItem: {
-    backgroundColor: '#f0f0f0', // Un color más apagado para indicar inactividad
-    elevation: 0, // Sin sombra
-    shadowOpacity: 0,
-    borderWidth: 2,
-    borderColor: '#e0e0e0',
+    backgroundColor: 'transparent',
+    borderColor: Colors.dark.gray,
     borderStyle: 'dashed',
   },
 });

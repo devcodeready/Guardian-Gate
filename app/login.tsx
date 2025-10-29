@@ -6,11 +6,13 @@ import { ThemedInput } from '@/components/ui/ThemedInput';
 import { Colors, Fonts } from '@/constants/theme';
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTimer } from '@/context/TimerContext';
 
 export default function LoginScreen() {
   const [employeeNumber, setEmployeeNumber] = useState('');
   const [pin, setPin] = useState('');
   const router = useRouter();
+  const { startTimer } = useTimer();
 
   const handleLogin = () => {
     if (!employeeNumber.trim() || pin.length !== 4) {
@@ -18,6 +20,7 @@ export default function LoginScreen() {
       return;
     }
     console.log('Authentication simulated successful for:', { employeeNumber });
+    startTimer(); // <-- 3. INICIAR EL TEMPORIZADOR
     router.replace('/(main)');
   };
 
