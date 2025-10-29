@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedInput } from '@/components/ui/ThemedInput';
@@ -14,11 +14,11 @@ export default function LoginScreen() {
 
   const handleLogin = () => {
     if (!employeeNumber.trim() || pin.length !== 4) {
-      Alert.alert('Acceso Denegado', 'Por favor, verifique su número de empleado y PIN.');
+      Alert.alert('Access Denied', 'Please check your employee number and PIN.');
       return;
     }
-    console.log('Autenticación simulada exitosa para:', { employeeNumber });
-    router.replace('/(main)'); 
+    console.log('Authentication simulated successful for:', { employeeNumber });
+    router.replace('/(main)');
   };
 
   return (
@@ -27,38 +27,44 @@ export default function LoginScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingContainer}
       >
-        <View style={styles.header}>
-          <MaterialIcons name="security" size={60} color={Colors.primary} />
-          <ThemedText style={styles.title}>Guardian Gate</ThemedText>
-          <ThemedText style={styles.subtitle}>Control de Acceso Corporativo</ThemedText>
-        </View>
-
-        <View style={styles.formContainer}>
-          <ThemedInput
-            placeholder="Número de Empleado"
-            value={employeeNumber}
-            onChangeText={setEmployeeNumber}
-            keyboardType="numeric"
-            style={{ fontFamily: Fonts.sans }}
-          />
-          <ThemedInput
-            placeholder="PIN de Seguridad"
-            value={pin}
-            onChangeText={setPin}
-            keyboardType="numeric"
-            maxLength={4}
-            secureTextEntry
-            style={{ fontFamily: Fonts.sans }}
-          />
-        </View>
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleLogin}
-          activeOpacity={0.8}
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <ThemedText style={styles.buttonText}>Ingresar</ThemedText>
-        </TouchableOpacity>
+          <View style={styles.header}>
+            <MaterialIcons name="security" size={60} color={Colors.secondary} />
+            <ThemedText style={styles.title}>Login</ThemedText>
+            <ThemedText style={styles.subtitle}>Enter your employee number and PIN</ThemedText>
+          </View>
+
+          <View style={styles.formContainer}>
+            <ThemedInput
+              placeholder="Employee Number"
+              value={employeeNumber}
+              onChangeText={setEmployeeNumber}
+              keyboardType="numeric"
+              style={{ fontFamily: Fonts.sans }}
+            />
+            <ThemedInput
+              placeholder="Security PIN"
+              value={pin}
+              onChangeText={setPin}
+              keyboardType="numeric"
+              maxLength={4}
+              secureTextEntry
+              style={{ fontFamily: Fonts.sans }}
+            />
+          </View>
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleLogin}
+            activeOpacity={0.8}
+          >
+            <ThemedText style={styles.buttonText}>Authenticate</ThemedText>
+          </TouchableOpacity>
+        </ScrollView>
       </KeyboardAvoidingView>
     </ThemedView>
   );
@@ -70,32 +76,38 @@ const styles = StyleSheet.create({
   },
   keyboardAvoidingContainer: {
     flex: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: 24,
+    // Añade un padding vertical para asegurar que nunca toque los bordes
+    paddingVertical: 20, 
   },
   header: {
     alignItems: 'center',
-    marginBottom: 48,
+    marginBottom: 60,
+    gap: 24,
   },
   title: {
     fontSize: 32,
     fontFamily: Fonts.serif,
     fontWeight: 'bold',
-    color: Colors.primary,
-    marginTop: 16,
+    color: Colors.secondary,
+    lineHeight: 24, // <-- ¡AQUÍ ESTÁ LA MAGIA!
   },
   subtitle: {
     fontSize: 16,
     fontFamily: Fonts.sans,
     color: '#687076',
-    marginTop: 4,
+    textAlign: 'center',
   },
   formContainer: {
-    gap: 18,
-    marginBottom: 32,
+    gap: 20,
+    marginBottom: 40,
   },
   button: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.secondary,
     paddingVertical: 18,
     borderRadius: 12,
     alignItems: 'center',

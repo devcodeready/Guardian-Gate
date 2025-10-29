@@ -9,7 +9,7 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics'; // --- 1. IMPORTAR HAPTICS ---
+import * as Haptics from 'expo-haptics';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Fonts } from '@/constants/theme';
@@ -44,7 +44,9 @@ export default function WelcomeScreen() {
   
   const iconSize = width * 0.22;
   const titleFontSize = width * 0.13;
-  const titleLineHeight = titleFontSize * 1.1;
+  
+  // ¡CAMBIO CLAVE! Usamos 1.2 para un margen de seguridad cómodo en la altura de línea.
+  const titleLineHeight = titleFontSize * 1.2; 
 
   const handleConfirm = () => {
     setModalVisible(false);
@@ -55,9 +57,7 @@ export default function WelcomeScreen() {
     setModalVisible(false);
   };
   
-  // --- 2. CREAR FUNCIÓN QUE INCLUYE LA VIBRACIÓN ---
   const handleStartPress = () => {
-    // Proporciona una vibración ligera para indicar que la acción fue registrada.
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setModalVisible(true);
   };
@@ -69,9 +69,11 @@ export default function WelcomeScreen() {
           <View style={styles.logoContainer}>
             <MaterialIcons name="security" size={iconSize} color={Colors.secondary} />
             <View style={styles.titleContainer}>
+              {/* Aplicando el nuevo titleLineHeight */}
               <ThemedText style={[styles.title, { fontSize: titleFontSize, lineHeight: titleLineHeight }]}>
                 Guardian{' '}
               </ThemedText>
+              {/* Aplicando el nuevo titleLineHeight */}
               <ThemedText style={[styles.title, { color: Colors.secondary, fontSize: titleFontSize, lineHeight: titleLineHeight }]}>
                 Gate
               </ThemedText>
@@ -80,7 +82,7 @@ export default function WelcomeScreen() {
 
           <AnimatedTouchableOpacity
             style={[styles.button, animatedStyle]}
-            onPress={handleStartPress} // --- 3. USAR LA NUEVA FUNCIÓN ---
+            onPress={handleStartPress}
             activeOpacity={0.8}
           >
             <ThemedText style={styles.buttonText}>Start</ThemedText>
@@ -97,7 +99,6 @@ export default function WelcomeScreen() {
   );
 }
 
-// ... (los estilos permanecen igual)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -105,19 +106,20 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    justifyContent: 'center',
+    // Layout original: Centra todo el contenido
+    justifyContent: 'center', 
     alignItems: 'center',
     paddingHorizontal: 24,
   },
   contentContainer: {
     width: '100%',
     alignItems: 'center',
-    gap: 80,
+    gap: 80, // Espacio entre el logo/título y el botón
   },
   logoContainer: {
     alignItems: 'center',
     width: '100%',
-    gap: 20,
+    gap: 20, // Espacio entre el escudo y el texto
   },
   titleContainer: {
     flexDirection: 'row',
