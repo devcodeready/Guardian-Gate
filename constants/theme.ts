@@ -1,3 +1,4 @@
+
 import { Platform } from 'react-native';
 
 // Tu paleta de colores con nombres semánticos
@@ -13,6 +14,7 @@ export const Colors = {
     icon: '#687076',
     tabIconDefault: '#687076',
     tabIconSelected: secondaryColor,
+    gray: '#adb5bd', // Gris neutro añadido
   },
   dark: {
     text: '#ECEDEE',
@@ -21,6 +23,7 @@ export const Colors = {
     icon: '#9BA1A6',
     tabIconDefault: '#9BA1A6',
     tabIconSelected: accentColor,
+    gray: '#495057', // Gris oscuro añadido
   },
   // Colores adicionales para acceso global
   primary: primaryColor,
