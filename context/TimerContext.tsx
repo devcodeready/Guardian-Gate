@@ -1,57 +1,80 @@
 import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
 
-// Tiempo inicial en segundos (30 minutos * 60 segundos)
-const INITIAL_TIME = 30 * 60;
+// Tiempos iniciales en segundos
+const INITIAL_MAIN_TIME = 30 * 60;   // 30 minutos
+const INITIAL_MIDDLE_TIME = 15 * 60; // 15 minutos
+const INITIAL_BOTTOM_TIME = 5 * 60;  // 5 minutos
 
-// Definimos la forma de nuestro contexto
-interface TimerContextType {
+// Forma del estado de un temporizador individual
+interface TimerState {
   countdown: number;
-  startTimer: () => void;
-  isTimerActive: boolean;
+  isActive: boolean;
 }
 
-// Creamos el contexto con valores por defecto
+// Forma completa de nuestro contexto
+interface TimerContextType {
+  mainTimer: TimerState;
+  middleTimer: TimerState;
+  bottomTimer: TimerState;
+  startTimers: () => void;
+}
+
 const TimerContext = createContext<TimerContextType | undefined>(undefined);
 
-// Creamos el Proveedor del contexto
 export const TimerProvider = ({ children }: { children: ReactNode }) => {
-  const [countdown, setCountdown] = useState(INITIAL_TIME);
-  const [isTimerActive, setIsTimerActive] = useState(false);
+  // Estado para cada uno de los tres temporizadores
+  const [mainTimer, setMainTimer] = useState<TimerState>({ countdown: INITIAL_MAIN_TIME, isActive: false });
+  const [middleTimer, setMiddleTimer] = useState<TimerState>({ countdown: INITIAL_MIDDLE_TIME, isActive: false });
+  const [bottomTimer, setBottomTimer] = useState<TimerState>({ countdown: INITIAL_BOTTOM_TIME, isActive: false });
 
+  // useEffect para el temporizador principal (30 min)
   useEffect(() => {
-    // Si el temporizador no está activo, no hacemos nada
-    if (!isTimerActive) return;
-
-    // Si el tiempo llega a cero, lo detenemos
-    if (countdown <= 0) {
-      setIsTimerActive(false);
-      return;
-    }
-
-    // Creamos un intervalo que se ejecuta cada segundo
+    if (!mainTimer.isActive || mainTimer.countdown <= 0) return;
     const intervalId = setInterval(() => {
-      setCountdown((prevCountdown) => prevCountdown - 1);
+      setMainTimer(prev => ({ ...prev, countdown: prev.countdown - 1 }));
     }, 1000);
-
-    // Función de limpieza: se ejecuta cuando el componente se desmonta
-    // para evitar fugas de memoria.
     return () => clearInterval(intervalId);
-  }, [countdown, isTimerActive]); // Se vuelve a ejecutar si 'countdown' o 'isTimerActive' cambian
+  }, [mainTimer.isActive, mainTimer.countdown]);
 
-  // Función para iniciar/reiniciar el temporizador
-  const startTimer = () => {
-    setCountdown(INITIAL_TIME);
-    setIsTimerActive(true);
+  // useEffect para el temporizador intermedio (15 min)
+  useEffect(() => {
+    if (!middleTimer.isActive || middleTimer.countdown <= 0) return;
+    const intervalId = setInterval(() => {
+      setMiddleTimer(prev => ({ ...prev, countdown: prev.countdown - 1 }));
+    }, 1000);
+    return () => clearInterval(intervalId);
+  }, [middleTimer.isActive, middleTimer.countdown]);
+
+  // useEffect para el temporizador inferior (5 min)
+  useEffect(() => {
+    if (!bottomTimer.isActive || bottomTimer.countdown <= 0) return;
+    const intervalId = setInterval(() => {
+      setBottomTimer(prev => ({ ...prev, countdown: prev.countdown - 1 }));
+    }, 1000);
+    return () => clearInterval(intervalId);
+  }, [bottomTimer.isActive, bottomTimer.countdown]);
+
+  // Función para iniciar TODOS los temporizadores simultáneamente
+  const startTimers = () => {
+    setMainTimer({ countdown: INITIAL_MAIN_TIME, isActive: true });
+    setMiddleTimer({ countdown: INITIAL_MIDDLE_TIME, isActive: true });
+    setBottomTimer({ countdown: INITIAL_BOTTOM_TIME, isActive: true });
+  };
+
+  const contextValue = {
+    mainTimer,
+    middleTimer,
+    bottomTimer,
+    startTimers,
   };
 
   return (
-    <TimerContext.Provider value={{ countdown, startTimer, isTimerActive }}>
+    <TimerContext.Provider value={contextValue}>
       {children}
     </TimerContext.Provider>
   );
 };
 
-// Hook personalizado para usar el contexto fácilmente en otros componentes
 export const useTimer = () => {
   const context = useContext(TimerContext);
   if (context === undefined) {

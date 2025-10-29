@@ -6,21 +6,30 @@ import { ThemedInput } from '@/components/ui/ThemedInput';
 import { Colors, Fonts } from '@/constants/theme';
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useTimer } from '@/context/TimerContext';
+import { useTimer } from '@/context/TimerContext'; // Hook para acceder al contexto del temporizador
 
 export default function LoginScreen() {
   const [employeeNumber, setEmployeeNumber] = useState('');
   const [pin, setPin] = useState('');
   const router = useRouter();
-  const { startTimer } = useTimer();
+  
+  // Obtenemos la función para iniciar todos los temporizadores desde nuestro hook personalizado
+  const { startTimers } = useTimer();
 
   const handleLogin = () => {
+    // Validación de los campos de entrada
     if (!employeeNumber.trim() || pin.length !== 4) {
       Alert.alert('Access Denied', 'Please check your employee number and PIN.');
       return;
     }
+    
     console.log('Authentication simulated successful for:', { employeeNumber });
-    startTimer(); // <-- 3. INICIAR EL TEMPORIZADOR
+
+    // --- ACCIÓN CLAVE ---
+    // Al autenticarse, se inician los 3 temporizadores (30, 15 y 5 minutos)
+    startTimers(); 
+    
+    // Se redirige al usuario a la pantalla del menú principal
     router.replace('/(main)');
   };
 
@@ -84,7 +93,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: 24,
-    // Añade un padding vertical para asegurar que nunca toque los bordes
     paddingVertical: 20, 
   },
   header: {
@@ -97,7 +105,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif,
     fontWeight: 'bold',
     color: Colors.secondary,
-    lineHeight: 24, // <-- ¡AQUÍ ESTÁ LA MAGIA!
+    lineHeight: 24,
   },
   subtitle: {
     fontSize: 16,
